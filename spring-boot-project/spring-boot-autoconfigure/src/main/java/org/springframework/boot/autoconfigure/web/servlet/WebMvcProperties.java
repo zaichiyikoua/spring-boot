@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,10 +77,21 @@ public class WebMvcProperties {
 	private boolean ignoreDefaultModelOnRedirect = true;
 
 	/**
+	 * Whether to publish a ServletRequestHandledEvent at the end of each request.
+	 */
+	private boolean publishRequestHandledEvents = true;
+
+	/**
 	 * Whether a "NoHandlerFoundException" should be thrown if no Handler was found to
 	 * process a request.
 	 */
 	private boolean throwExceptionIfNoHandlerFound = false;
+
+	/**
+	 * Whether logging of (potentially sensitive) request details at DEBUG and TRACE level
+	 * is allowed.
+	 */
+	private boolean logRequestDetails;
 
 	/**
 	 * Whether to enable warn logging of exceptions resolved by a
@@ -143,12 +154,28 @@ public class WebMvcProperties {
 		this.ignoreDefaultModelOnRedirect = ignoreDefaultModelOnRedirect;
 	}
 
+	public boolean isPublishRequestHandledEvents() {
+		return this.publishRequestHandledEvents;
+	}
+
+	public void setPublishRequestHandledEvents(boolean publishRequestHandledEvents) {
+		this.publishRequestHandledEvents = publishRequestHandledEvents;
+	}
+
 	public boolean isThrowExceptionIfNoHandlerFound() {
 		return this.throwExceptionIfNoHandlerFound;
 	}
 
 	public void setThrowExceptionIfNoHandlerFound(boolean throwExceptionIfNoHandlerFound) {
 		this.throwExceptionIfNoHandlerFound = throwExceptionIfNoHandlerFound;
+	}
+
+	public boolean isLogRequestDetails() {
+		return this.logRequestDetails;
+	}
+
+	public void setLogRequestDetails(boolean logRequestDetails) {
+		this.logRequestDetails = logRequestDetails;
 	}
 
 	public boolean isLogResolvedException() {
@@ -207,8 +234,7 @@ public class WebMvcProperties {
 
 		/**
 		 * Amount of time before asynchronous request handling times out. If this value is
-		 * not set, the default timeout of the underlying implementation is used, e.g. 10
-		 * seconds on Tomcat with Servlet 3.
+		 * not set, the default timeout of the underlying implementation is used.
 		 */
 		private Duration requestTimeout;
 

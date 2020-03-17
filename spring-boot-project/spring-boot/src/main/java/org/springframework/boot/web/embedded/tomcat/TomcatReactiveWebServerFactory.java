@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.Engine;
@@ -54,6 +55,7 @@ import org.springframework.util.StringUtils;
  * {@link ReactiveWebServerFactory} that can be used to create a {@link TomcatWebServer}.
  *
  * @author Brian Clozel
+ * @author HaiTao Zhang
  * @since 2.0.0
  */
 public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFactory
@@ -72,11 +74,11 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 
 	private List<LifecycleListener> contextLifecycleListeners = getDefaultLifecycleListeners();
 
-	private Collection<TomcatContextCustomizer> tomcatContextCustomizers = new LinkedHashSet<>();
+	private Set<TomcatContextCustomizer> tomcatContextCustomizers = new LinkedHashSet<>();
 
-	private Collection<TomcatConnectorCustomizer> tomcatConnectorCustomizers = new LinkedHashSet<>();
+	private Set<TomcatConnectorCustomizer> tomcatConnectorCustomizers = new LinkedHashSet<>();
 
-	private Collection<TomcatProtocolHandlerCustomizer<?>> tomcatProtocolHandlerCustomizers = new LinkedHashSet<>();
+	private Set<TomcatProtocolHandlerCustomizer<?>> tomcatProtocolHandlerCustomizers = new LinkedHashSet<>();
 
 	private final List<Connector> additionalTomcatConnectors = new ArrayList<>();
 
@@ -129,7 +131,7 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 		}
 		TomcatHttpHandlerAdapter servlet = new TomcatHttpHandlerAdapter(httpHandler);
 		prepareContext(tomcat.getHost(), servlet);
-		return new TomcatWebServer(tomcat, getPort() >= 0);
+		return getTomcatWebServer(tomcat);
 	}
 
 	private void configureEngine(Engine engine) {
@@ -174,7 +176,7 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 	}
 
 	protected void customizeConnector(Connector connector) {
-		int port = (getPort() >= 0) ? getPort() : 0;
+		int port = Math.max(getPort(), 0);
 		connector.setPort(port);
 		if (StringUtils.hasText(this.getServerHeader())) {
 			connector.setAttribute("server", this.getServerHeader());
@@ -234,7 +236,7 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 	 */
 	public void setTomcatContextCustomizers(Collection<? extends TomcatContextCustomizer> tomcatContextCustomizers) {
 		Assert.notNull(tomcatContextCustomizers, "TomcatContextCustomizers must not be null");
-		this.tomcatContextCustomizers = new ArrayList<>(tomcatContextCustomizers);
+		this.tomcatContextCustomizers = new LinkedHashSet<>(tomcatContextCustomizers);
 	}
 
 	/**
@@ -265,7 +267,7 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 	public void setTomcatConnectorCustomizers(
 			Collection<? extends TomcatConnectorCustomizer> tomcatConnectorCustomizers) {
 		Assert.notNull(tomcatConnectorCustomizers, "TomcatConnectorCustomizers must not be null");
-		this.tomcatConnectorCustomizers = new ArrayList<>(tomcatConnectorCustomizers);
+		this.tomcatConnectorCustomizers = new LinkedHashSet<>(tomcatConnectorCustomizers);
 	}
 
 	/**
@@ -297,7 +299,7 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 	public void setTomcatProtocolHandlerCustomizers(
 			Collection<? extends TomcatProtocolHandlerCustomizer<?>> tomcatProtocolHandlerCustomizers) {
 		Assert.notNull(tomcatProtocolHandlerCustomizers, "TomcatProtocolHandlerCustomizers must not be null");
-		this.tomcatProtocolHandlerCustomizers = new ArrayList<>(tomcatProtocolHandlerCustomizers);
+		this.tomcatProtocolHandlerCustomizers = new LinkedHashSet<>(tomcatProtocolHandlerCustomizers);
 	}
 
 	/**
@@ -411,7 +413,7 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 	 * @return a new {@link TomcatWebServer} instance
 	 */
 	protected TomcatWebServer getTomcatWebServer(Tomcat tomcat) {
-		return new TomcatWebServer(tomcat, getPort() >= 0);
+		return new TomcatWebServer(tomcat, getPort() >= 0, getShutdown().getGracePeriod());
 	}
 
 	/**

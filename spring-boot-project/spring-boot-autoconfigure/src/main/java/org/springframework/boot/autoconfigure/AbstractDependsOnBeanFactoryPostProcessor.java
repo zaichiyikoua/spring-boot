@@ -30,6 +30,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.core.Ordered;
 import org.springframework.util.StringUtils;
 
 /**
@@ -45,7 +46,7 @@ import org.springframework.util.StringUtils;
  * @since 1.3.0
  * @see BeanDefinition#setDependsOn(String[])
  */
-public abstract class AbstractDependsOnBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+public abstract class AbstractDependsOnBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ordered {
 
 	private final Class<?> beanClass;
 
@@ -54,7 +55,7 @@ public abstract class AbstractDependsOnBeanFactoryPostProcessor implements BeanF
 	private final Function<ListableBeanFactory, Set<String>> dependsOn;
 
 	/**
-	 * Create an instance with target bean and factory bean classes and dependency names.
+	 * Create an instance with target bean, factory bean classes, and dependency names.
 	 * @param beanClass target bean class
 	 * @param factoryBeanClass target factory bean class
 	 * @param dependsOn dependency names
@@ -67,7 +68,7 @@ public abstract class AbstractDependsOnBeanFactoryPostProcessor implements BeanF
 	}
 
 	/**
-	 * Create an instance with target bean and factory bean classes and dependency types.
+	 * Create an instance with target bean, factory bean classes, and dependency types.
 	 * @param beanClass target bean class
 	 * @param factoryBeanClass target factory bean class
 	 * @param dependencyTypes dependency types
@@ -112,6 +113,11 @@ public abstract class AbstractDependsOnBeanFactoryPostProcessor implements BeanF
 			}
 			definition.setDependsOn(dependencies);
 		}
+	}
+
+	@Override
+	public int getOrder() {
+		return 0;
 	}
 
 	private Set<String> getBeanNames(ListableBeanFactory beanFactory) {
